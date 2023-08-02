@@ -1,0 +1,25 @@
+.wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  h1 {
+    color: #a1a48c;
+  }
+  .menuList {
+    list-style-type: none;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    cursor: pointer;
+
+    li {
+      h3 {
+        text-transform: uppercase;
+      }
+      h3:hover {
+        color: #8b1414;
+      }
+    }
+  }
+}
