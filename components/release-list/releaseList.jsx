@@ -7,13 +7,19 @@ import Image from "next/image";
 import styles from "./release-list.module.scss";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { releasesStore } from "@/store/releases-store";
+import { montserrat_alternates_header } from "@/utils/font-loader";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const ReleaseList = () => {
-  const [releases, setReleases] = useState([]);
-  const [showDialog, setShowDialog] = useState(false);
   const main = useRef([]);
+  const headerRef = useRef(null);
+
+  const [releases, updateReleases] = releasesStore((state) => [
+    state.releases,
+    state.updateReleases,
+  ]);
 
   const fetchReleases = async () => {
     const res = await axios.get(
@@ -25,71 +31,84 @@ const ReleaseList = () => {
       }
     );
     const { data } = await res;
-    setReleases(data.releases);
-
-    console.log(
-      "🚀 ~ file: releaseList.jsx:39 ~ main.current.forEach ~ main.current:",
-      main.current
-    );
+    updateReleases(data.releases);
   };
+  useEffect(() => {
+    if (releases.length === 0) {
+      fetchReleases();
+    }
+  }, [releases]);
 
   useEffect(() => {
-    fetchReleases();
     main.current.forEach((el) => {
-      const anim = gsap.fromTo(
-        el,
-        { autoAlpha: 0, y: 50 },
-        { duration: 1, autoAlpha: 1, y: 0 }
-      );
+      const anim = gsap.to(el, {
+        duration: 1,
+        ease: "power2",
+        clipPath: "polygon(0% 100%, 100% 100%, 100% 0%, 0% 0%)",
+        opacity: 1,
+        y: 0,
+      });
       ScrollTrigger.create({
         trigger: el,
+        // markers: true,
+        start: "150px bottom",
+        // scrub: true,
+        end: "bottom top",
         animation: anim,
-        toggleActions: "play none none none",
-        once: true,
+        // toggleActions: "play none none none",
+        // once: true,
       });
     });
-  }, []);
-  useEffect(() => {}, []);
-  const show = () => {
-    setShowDialog(true);
-  };
-  const hide = () => {
-    setShowDialog(false);
-  };
+  }, [releases]);
+
+  useEffect(() => {
+    const anim = gsap.to(
+      headerRef.current,
+      // { autoAlpha: 0, opacity: 0, y: 150 },
+      {
+        duration: 1.5,
+        ease: "power2",
+        clipPath: "polygon(0% 100%, 100% 100%, 100% 0%, 0% 0%)",
+        opacity: 1,
+        y: 0,
+      }
+    );
+    ScrollTrigger.create({
+      trigger: headerRef.current,
+      animation: anim,
+      // toggleActions: "play none none none",
+      start: "top bottom",
+      // end: "bottom bottom",
+      once: true,
+    });
+  }, [headerRef]);
+
   const addToRefs = (el) => {
     if (el && !main.current.includes(el)) {
       main.current.push(el);
     }
-    // console.log(
-    //   "🚀 ~ file: releaseList.jsx:45 ~ addToRefs ~ main.current:",
-    //   main.current
-    // );
   };
   return (
     <div className={styles.listWrapper}>
-      <h1>Work</h1>
+      <h1
+        className={`${montserrat_alternates_header.className} ${styles.workHeader}`}
+        ref={headerRef}
+      >
+        Work
+      </h1>
       <ul className={styles.releaseList}>
         {releases.map((release) => {
           return (
-            // <Image
-            //   alt="aa"
-            //   width={150}
-            //   height={150}
-            //   src={release.thumb}
-            //   ref={addToRefs}
-            //   key={release.id}
-            // ></Image>
             // <li key={release.id}>{release.title}</li>
             // <li key={release.id}>{release.title}</li>
-
-            <Album
-              key={release.id}
-              {...release}
-              ref={addToRefs}
-              release={release}
-              // mouseEnter={show}
-              // mouseLeave={hide}
-            ></Album>
+            <div className={styles.mask} key={release.id} ref={addToRefs}>
+              <Album
+                {...release}
+                release={release}
+                // mouseEnter={show}
+                // mouseLeave={hide}
+              ></Album>
+            </div>
           );
         })}
       </ul>

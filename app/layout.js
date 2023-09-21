@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import "./globals.scss";
-import { inter } from "@/utils/font-loader";
 
 export const metadata = {
   title: "Create Next App",
@@ -12,7 +11,7 @@ export default function RootLayout({ children }) {
   return (
     <>
       <html lang="en" suppressHydrationWarning={true}>
-        <body className={inter.className}>{children}</body>
+        <body>{children}</body>
       </html>
     </>
   );
